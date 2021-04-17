@@ -1,0 +1,37 @@
+name,parent
+Country,null
+Alternative country,Country
+Cowpunk,Alternative country
+Americana,Country
+Australian country,Country
+Bakersfield sound,Country
+Bluegrass,Country
+Progressive bluegrass,Bluegrass
+Cajun,Country
+Cajun fiddle,Cajun
+Christian country,Country
+Classic country,Country
+Close harmony,Country
+Country blues,Country
+Country pop,Country
+Country rap,Country
+Country rock,Country
+Cowboy,Country
+Cowboy pop,Cowboy
+Dansband,Country
+Hokum,Country
+Honky tonk,Country
+Música sertaneja,Country
+Nashville sound,Country
+Neotraditional country,Country
+Outlaw country,Country
+Progressive country,Country
+Red Dirt,Country
+Rockabilly,Country
+Hellbilly,Rockabilly
+Psychobilly,Rockabilly
+Texas country,Country
+Traditional country,Country
+Truck-driving country,Country
+Western swing,Country
+Zydeco,Country

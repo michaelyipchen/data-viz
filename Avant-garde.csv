@@ -1,0 +1,10 @@
+name,parent
+Avant-garde,null
+Experimental,Avant-garde
+Noise,Avant-garde
+Harsh Noise,Noise
+Harsh noise wall,Noise
+Outsider music,Avant-garde
+Lo-fi,Avant-garde
+Musique concrète,Avant-garde
+Electroacoustic,Avant-garde
