@@ -2,6 +2,7 @@
 <head>
   <meta charset="utf-8">
   <script src="//d3js.org/d3.v4.min.js"></script>
+  <script src="https://d3js.org/d3-hierarchy.v2.min.js"></script>
   <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
   
   <style>
@@ -52,12 +53,15 @@
       g.attr("transform", d3.event.transform);
     }
     
-    d3.json("countryHierarchy.json", function (data){
+    
+    //d3.json("countryHierarchy.json", function (data){
+    d3.json("music.json", function (data){
       var hierarchy = d3.hierarchy(data);
+      console.log(hierarchy);
       cluster(hierarchy);
       var descendants = hierarchy.descendants();
       
-      fontSize.domain(d3.extent(descendants, function (d){ return d.depth; }))
+      fontSize.domain(d3.extent(descendants, function (d){ return d.depth -2; }))
       
       var link = g.selectAll(".link")
           .data(descendants.slice(1))
@@ -112,7 +116,7 @@
         })
         .attr("dx", function (d){
           if(d.depth === 3){
-            return (d.x > Math.PI) ? "-2px" : "2px";
+            return (d.x > Math.PI) ? "-4px" : "4px";
           } else {
             return "0px";
           }
