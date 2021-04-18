@@ -741,6 +741,177 @@
               "data": {
                 "id": "Merseybeat"
               }
+            },
+            {
+              "data": {
+                "id": "New wave"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "World fusion"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Paisley Underground"
+              }
+            },
+            {
+              "data": {
+                "id": "Desert rock"
+              }
+            },
+            {
+              "data": {
+                "id": "Pop rock"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "Soft rock"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Progressive rock"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "Canterbury scene"
+                  }
+                },
+                {
+                  "data": {
+                    "id": "Krautrock"
+                  }
+                },
+                {
+                  "data": {
+                    "id": "New prog"
+                  }
+                },
+                {
+                  "data": {
+                    "id": "Rock in Opposition"
+                  }
+                },
+                {
+                  "data": {
+                    "id": "Space rock"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Psychedelic rock"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "Acid rock"
+                  }
+                },
+                {
+                  "data": {
+                    "id": "Freakbeat"
+                  }
+                },
+                {
+                  "data": {
+                    "id": "Neo-psychedelia"
+                  }
+                },
+                {
+                  "data": {
+                    "id": "Raga rock"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Punk rock"
+              }
+            },
+            {
+              "data": {
+                "id": "Rap rock"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "Rapcore"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Rock and roll"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "Rockabilly"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Southern rock"
+              }
+            },
+            {
+              "data": {
+                "id": "Stoner rock"
+              }
+            },
+            {
+              "data": {
+                "id": "Sufi rock"
+              }
+            },
+            {
+              "data": {
+                "id": "Surf rock"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "Trop Rock"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Visual kei"
+              },
+              "children": [
+                {
+                  "data": {
+                    "id": "Nagoya kei"
+                  }
+                }
+              ]
+            },
+            {
+              "data": {
+                "id": "Worldbeat"
+              }
+            },
+            {
+              "data": {
+                "id": "Wrock"
+              }
             }
           ]
         }
