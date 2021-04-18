@@ -1,122 +1,133 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-    /* set the CSS */
-
-    .node circle {
-        fill: #fff;
-        stroke: steelblue;
-        stroke-width: 3px;
-    }
-
-    .node text {
-        font: 12px sans-serif;
-    }
-
-    .node--internal text {
-        text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
-    }
-
+<head>
+  <meta charset="utf-8">
+  <script src="//d3js.org/d3.v4.min.js"></script>
+  <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+  
+  <style>
     .link {
-        fill: none;
-        stroke: #ccc;
-        stroke-width: 2px;
+      fill: none;
+      stroke: #4fb9b5;
     }
-</style>
+    .glow {
+
+      /* This trick adds a heavy white shadow around the text. */
+      text-shadow:
+       -1px -1px 3px white,
+       -1px  1px 3px white,
+        1px -1px 3px white,
+        1px  1px 3px white;
+
+    }
+    text {
+      font-family: sans-serif;
+      pointer-events: none;
+    }
+  </style>
+</head>
 
 <body>
+  <script>
+    var width = 960,
+        height = 950,
+        svg = d3.select("body").append("svg")
+          .attr("width", width)
+          .attr("height", height),
+        g = svg.append("g"),
+        cluster = d3.cluster()
+          .size([2 * Math.PI, width / 2 - 150])
+        fontSize = d3.scaleSqrt()
+          .range([30, 7]);
 
-    <!-- load the d3.js library -->
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script>
+    svg.append("rect")
+      .attr("width", width)
+      .attr("height", height)
+      .style("fill", "none")
+      .style("pointer-events", "all")
+      .call(d3.zoom()
+          .scaleExtent([1 / 2, 4])
+          .on("zoom", zoomed));
 
-        // set the dimensions and margins of the diagram
-        var margin = { top: 20, right: 90, bottom: 30, left: 90 },
-            width = 660 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
+    function zoomed() {
+      g.attr("transform", d3.event.transform);
+    }
+    
+    d3.json("countryHierarchy.json", function (data){
+      var hierarchy = d3.hierarchy(data);
+      cluster(hierarchy);
+      var descendants = hierarchy.descendants();
+      
+      fontSize.domain(d3.extent(descendants, function (d){ return d.depth; }))
+      
+      var link = g.selectAll(".link")
+          .data(descendants.slice(1))
+        .enter().append("path")
+          .attr("class", "link")
+          .attr("d", function(d) {
+            if(d.parent === descendants[0]){
+              return "M" + project(d.x, d.y)
+                + " " + project(d.parent.x, d.parent.y);
+            } else {
+              return "M" + project(d.x, d.y)
+                + "C" + project(d.x, (d.y + d.parent.y) / 2)
+                + " " + project(d.parent.x, (d.y + d.parent.y) / 2)
+                + " " + project(d.parent.x, d.parent.y);
+            }
+          });
+      
+      var node = g.selectAll(".node")
+          .data(descendants)
+        .enter().append("g")
+          .attr("transform", function(d) {
+            return "translate(" + project(d.x, d.y) + ")";
+          });
 
-        // declares a tree layout and assigns the size
-        var treemap = d3.tree()
-            .size([height, width]);
-
-        // load the external data
-        d3.csv("Blues.csv", function (error, flatData) {
-            if (error) throw error;
-
-            // assign null correctly
-            flatData.forEach(function (d) {
-                if (d.parent == "null") { d.parent = null };
-            });
-
-            // convert the flat data into a hierarchy 
-            var treeData = d3.stratify()
-                .id(function (d) { return d.name; })
-                .parentId(function (d) { return d.parent; })
-                (flatData);
-
-            // assign the name to each node
-            treeData.each(function (d) {
-                d.name = d.id;
-            });
-
-            //  assigns the data to a hierarchy using parent-child relationships
-            var nodes = d3.hierarchy(treeData, function (d) {
-                return d.children;
-            });
-
-            // maps the node data to the tree layout
-            
-            nodes = treemap(nodes);
-            console.log(nodes);
-
-            // append the svg object to the body of the page
-            // appends a 'group' element to 'svg'
-            // moves the 'group' element to the top left margin
-            var svg = d3.select("body").append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom),
-                g = svg.append("g")
-                    .attr("transform",
-                        "translate(" + margin.left + "," + margin.top + ")");
-
-            // adds the links between the nodes
-            var link = g.selectAll(".link")
-                .data(nodes.descendants().slice(1))
-                .enter().append("path")
-                .attr("class", "link")
-                .attr("d", function (d) {
-                    return "M" + d.y + "," + d.x
-                        + "C" + (d.y + d.parent.y) / 2 + "," + d.x
-                        + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
-                        + " " + d.parent.y + "," + d.parent.x;
-                });
-
-            // adds each node as a group
-            var node = g.selectAll(".node")
-                .data(nodes.descendants())
-                .enter().append("g")
-                .attr("class", function (d) {
-                    return "node" +
-                        (d.children ? " node--internal" : " node--leaf");
-                })
-                .attr("transform", function (d) {
-                    return "translate(" + d.y + "," + d.x + ")";
-                });
-
-            // adds the circle to the node
-            node.append("circle")
-                .attr("r", 10);
-
-            // adds the text to the node
-            node.append("text")
-                .attr("dy", ".35em")
-                .attr("x", function (d) { return d.children ? -13 : 13; })
-                .style("text-anchor", function (d) {
-                    return d.children ? "end" : "start";
-                })
-                .text(function (d) { return d.data.name; });
-
-        });
-
-    </script>
+      node.append("text")
+        .text(function (d){
+          return d.data.data.id;
+        })
+        .attr("font-size", function (d){
+          return fontSize(d.depth) + "pt";
+        })
+        .attr("transform", function(d) {
+          var theta = -d.x / Math.PI * 180 + 90;
+          if(d.x > Math.PI){
+            theta += 180;
+          }
+          if(d.depth !== 3 && Math.abs(theta) < 30){
+            theta = 0;
+          }
+          if(d.depth > 1){
+            return "rotate(" + theta + ")";
+          } else {
+            return "";
+          }
+        })
+        .attr("text-anchor", function (d){
+          if(d.depth === 3){
+            return (d.x > Math.PI) ? "end" : "start";
+          } else {
+            return "middle";
+          }
+        })
+        .attr("dx", function (d){
+          if(d.depth === 3){
+            return (d.x > Math.PI) ? "-2px" : "2px";
+          } else {
+            return "0px";
+          }
+        })
+        .classed("glow", function (d){
+          return d.depth !== 3;
+        })
+        .attr("alignment-baseline", "central");
+    });
+    
+    function project(theta, r){
+      return [
+        width / 2 + r * Math.sin(theta),
+        height / 2 + r * Math.cos(theta) + 4
+      ]
+    }
+  </script>
 </body>
