@@ -27,7 +27,7 @@
 
 </style>
 <body>
-<script src="//d3js.org/d3.v4.0.0-alpha.29.js"></script>
+<script src="https://d3js.org/d3.v4.0.0-alpha.29.js"></script>
 <script>
 
 var width = 960,
@@ -81,7 +81,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
 
-d3.tsv("d3-hierarchy.tsv", function(error, data) {
+d3.tsv("tsv/all-rock.csv", function(error, data) {
   if (error) throw error;
 
   // splitting keys into an array is required before passing data into burrow
