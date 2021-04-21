@@ -3,15 +3,15 @@
 <style>
 
 .node circle {
-  fill: #b94f4f;
+  fill: #514188;
 }
 
 .node text {
-  font: 7px sans-serif;
+  font: 10px sans-serif;
 }
 
 .node--internal circle {
-  fill: #b9994f;
+  fill: #25d678;
 }
 
 .node--internal text {
@@ -20,7 +20,7 @@
 
 .link {
   fill: none;
-  stroke: #5f4fb9;
+  stroke: #000000;
   stroke-opacity: 0.4;
   stroke-width: 1.5px;
 }
@@ -30,9 +30,9 @@
 <script src="https://d3js.org/d3.v4.0.0-alpha.29.js"></script>
 <script>
 
-var width = 2700,
-    height = 2700,
-    radius = 1400;
+var width = 1500,
+    height = 1500,
+    radius = 700;
 
 var burrow = function(table) {
   // create nested object
@@ -65,7 +65,7 @@ var burrow = function(table) {
 
   // use descend to create nested children arrys
   return {
-    name: "Music",
+    name: "Rock",
     children: descend(obj, 1),
     depth: 0
   }
@@ -81,7 +81,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
 
-d3.tsv("tsv/all-genre.csv", function(error, data) {
+d3.tsv("tsv/all-rock.csv", function(error, data) {
   if (error) throw error;
 
   // splitting keys into an array is required before passing data into burrow
