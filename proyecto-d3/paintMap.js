@@ -5,35 +5,75 @@ import {
     geoNaturalEarth1,
     csv,
     scaleOrdinal,
-    schemeRdBu,
     timeFormat,
     timeParse,
     scaleTime,
     drag,
-    hsl
+    hsl,
+    scaleQuantile,
+    randomNormal,
+    range,
+    schemeSpectral,
+    scaleQuantize,
+    schemeBlues,
+    interpolateLab,
+    interpolateRgb,
+    quantize,
+    interpolateHcl,
+    scaleLinear,
+    scale,
+    legend,
+    format
+
 } from 'd3';
 
 import { feature } from 'topojson';
 
-
 const projection = geoNaturalEarth1();
 const pathGenerator = geoPath().projection(projection);
-const colorScale = scaleOrdinal();
+
 
 export const paintMap = (g, data) => {
-
+    // const colorScale = scaleQuantile();
     g.append('path')
         .attr('class', 'sphere')
         .attr('d', pathGenerator({ type: 'Sphere' }));
 
 
-    const { date, topoData, temperatureData } = data;
-    console.log(date)
-    const countries = feature(topoData, topoData.objects.countries);
+    var { date, topoData, temperatureData, colorScale } = data;
 
-    const temperatureData1 = temperatureData.filter(r => r.dt === date);
-    const countryTemp = countryName => {
-        const temp = temperatureData1.find(x => x.Country === countryName)
+    let countries = feature(topoData, topoData.objects.countries);
+
+    let temperatureData1 = temperatureData.filter(r => r.dt === date);
+
+
+    var formatDate = timeFormat("%Y-%m-01");
+
+
+    let previousYear = (new Date(date))
+    previousYear.setFullYear(previousYear.getFullYear() - 1)
+    previousYear.setMonth(previousYear.getMonth() + 1)
+
+    console.log(date + '<------------')
+    console.log(formatDate(previousYear))
+
+    // console.log(temperatureData.find(x => x.Country === countryName && x.dt === previousYear))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    let countryTemp = countryName => {
+        let temp = temperatureData1.find(x => x.Country === countryName)
             //console.log(typeof(temp))
         if (typeof(temp) !== 'undefined') {
             // return temp.Country
@@ -50,34 +90,42 @@ export const paintMap = (g, data) => {
             // console.log(e)
     });
 
-    colorScale
-        .domain(countries.features.map(x => x.t1_fromTempDSCountry))
-        .range(schemeRdBu[8])
-        // console.log(countries.features[1].t1_fromTempDSCountry)
 
-
-    const mapDataJoin = g.selectAll('path').data(countries.features);
-
+    let mapDataJoin = g.selectAll('path').data(countries.features);
+    var tooltip = select("div.tooltip");
     mapDataJoin.enter().append('path')
         .attr('class', 'country')
         .attr('d', pathGenerator)
         .merge(mapDataJoin)
         .attr('fill', d => {
             //console.log(d.t1_fromTempDSCountry + '_' + d.properties.name + '_' + date)
-            if (d.t1_fromTempDSCountry === null || d.t1_fromTempDSCountry === '') {
+            if (d.t1_fromTempDSCountry === null || d.t1_fromTempDSCountry === '' || d.t1_fromTempDSCountry === 'NaN') {
                 return 'black'
             }
+            //colorScale.domain().forEach(e => console.log(`${e} ${d.properties.name}`))
+            //console.log(colorScale.domain()[0])
+            //console.log(colorScale(d.t1_fromTempDSCountry) + " " + d.t1_fromTempDSCountry + " " + d.properties.name)
+            // return colorScale(d.t1_fromTempDSCountry)
             return colorScale(d.t1_fromTempDSCountry)
         })
-        .append('title')
-        .text(d => d.properties.name + ' : ' + d.t1_fromTempDSCountry + ' °C')
+        .on("mouseover", function(d, i) {
+            return tooltip.style("hidden", false).html('hello' + d.t1_fromTempDSCountry);
+        })
+        .on("mousemove", function(d) {
+            tooltip.classed("hidden", false)
+                .style("top", (event.pageY) + "px")
+                .style("left", (event.pageX + 10) + "px")
+                .html(`<h2>${d.properties.name} ${
+                    d.t1_fromTempDSCountry === 'NaN' || d.t1_fromTempDSCountry === null ? 'No Data' : d.t1_fromTempDSCountry
+                }</h2>dfdf </br>
+                fdf`);
+        })
+        .on("mouseout", function(d, i) {
+            tooltip.classed("hidden", true);
+        });
 
 
-    g.selectAll('path').data(countries.features).append("text")
-        .attr("x", 70)
-        .attr("y", 700)
-        .attr("text-anchor", "middle")
-        .style("font-size", "15px")
-        .text(date);
+
+
 
 }

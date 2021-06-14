@@ -1,24 +1,51 @@
 (function (d3, topojson) {
     'use strict';
 
-    const projection$1 = d3.geoNaturalEarth1();
-    const pathGenerator = d3.geoPath().projection(projection$1);
-    const colorScale = d3.scaleOrdinal();
+    const projection = d3.geoNaturalEarth1();
+    const pathGenerator = d3.geoPath().projection(projection);
+
 
     const paintMap = (g, data) => {
-
+        // const colorScale = scaleQuantile();
         g.append('path')
             .attr('class', 'sphere')
             .attr('d', pathGenerator({ type: 'Sphere' }));
 
 
-        const { date, topoData, temperatureData } = data;
-        console.log(date);
-        const countries = topojson.feature(topoData, topoData.objects.countries);
+        var { date, topoData, temperatureData, colorScale } = data;
 
-        const temperatureData1 = temperatureData.filter(r => r.dt === date);
-        const countryTemp = countryName => {
-            const temp = temperatureData1.find(x => x.Country === countryName);
+        let countries = topojson.feature(topoData, topoData.objects.countries);
+
+        let temperatureData1 = temperatureData.filter(r => r.dt === date);
+
+
+        var formatDate = d3.timeFormat("%Y-%m-01");
+
+
+        let previousYear = (new Date(date));
+        previousYear.setFullYear(previousYear.getFullYear() - 1);
+        previousYear.setMonth(previousYear.getMonth() + 1);
+
+        console.log(date + '<------------');
+        console.log(formatDate(previousYear));
+
+        // console.log(temperatureData.find(x => x.Country === countryName && x.dt === previousYear))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        let countryTemp = countryName => {
+            let temp = temperatureData1.find(x => x.Country === countryName);
                 //console.log(typeof(temp))
             if (typeof(temp) !== 'undefined') {
                 // return temp.Country
@@ -35,78 +62,125 @@
                 // console.log(e)
         });
 
-        colorScale
-            .domain(countries.features.map(x => x.t1_fromTempDSCountry))
-            .range(d3.schemeRdBu[8]);
-            // console.log(countries.features[1].t1_fromTempDSCountry)
 
-
-        const mapDataJoin = g.selectAll('path').data(countries.features);
-
+        let mapDataJoin = g.selectAll('path').data(countries.features);
+        var tooltip = d3.select("div.tooltip");
         mapDataJoin.enter().append('path')
             .attr('class', 'country')
             .attr('d', pathGenerator)
             .merge(mapDataJoin)
             .attr('fill', d => {
                 //console.log(d.t1_fromTempDSCountry + '_' + d.properties.name + '_' + date)
-                if (d.t1_fromTempDSCountry === null || d.t1_fromTempDSCountry === '') {
+                if (d.t1_fromTempDSCountry === null || d.t1_fromTempDSCountry === '' || d.t1_fromTempDSCountry === 'NaN') {
                     return 'black'
                 }
+                //colorScale.domain().forEach(e => console.log(`${e} ${d.properties.name}`))
+                //console.log(colorScale.domain()[0])
+                //console.log(colorScale(d.t1_fromTempDSCountry) + " " + d.t1_fromTempDSCountry + " " + d.properties.name)
+                // return colorScale(d.t1_fromTempDSCountry)
                 return colorScale(d.t1_fromTempDSCountry)
             })
-            .append('title')
-            .text(d => d.properties.name + ' : ' + d.t1_fromTempDSCountry + ' °C');
+            .on("mouseover", function(d, i) {
+                return tooltip.style("hidden", false).html('hello' + d.t1_fromTempDSCountry);
+            })
+            .on("mousemove", function(d) {
+                tooltip.classed("hidden", false)
+                    .style("top", (event.pageY) + "px")
+                    .style("left", (event.pageX + 10) + "px")
+                    .html(`<h2>${d.properties.name} ${
+                    d.t1_fromTempDSCountry === 'NaN' || d.t1_fromTempDSCountry === null ? 'No Data' : d.t1_fromTempDSCountry
+                }</h2>dfdf </br>
+                fdf`);
+            })
+            .on("mouseout", function(d, i) {
+                tooltip.classed("hidden", true);
+            });
 
 
-        g.selectAll('path').data(countries.features).append("text")
-            .attr("x", 70)
-            .attr("y", 700)
-            .attr("text-anchor", "middle")
-            .style("font-size", "15px")
-            .text(date);
+
+
 
     };
 
+    var formatDateIntoYear = d3.timeFormat("%Y");
+    var formatDate = d3.timeFormat("%Y-%m-01");
+    var sliderDate = d3.timeFormat("%Y-%m");
+
+    var timer;
+
     const svg = d3.select('svg');
-
-    const projection = d3.geoNaturalEarth1();
-    d3.geoPath().projection(projection);
-
     const g = svg.append('g');
 
 
-    // g.append('path')
-    //     .attr('class', 'sphere')
-    //     .attr('d', pathGenerator({ type: 'Sphere' }));
+    // Properties
+    const colorPalette = ["#313695", "#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090", "#fdae61", "#f46d43", "#d73027", "#a50026"];
+    const lowestTemp = -30;
+    const highestTemp = 40;
+
+    // Color Scales
+    var indexToColor = d3.scale.quantile()
+        .domain([0, colorPalette.length - 1]) // 11 colores
+        .range(colorPalette);
+    var range = [...Array(colorPalette.length).keys()].map(indexToColor); //cantidad de colores a mapear, 11
+    var quant = d3.scale.quantile()
+        .domain([lowestTemp, highestTemp]) //dominio entrante
+        .range(range);
 
 
 
+    // Legend
+    let generateLegend = () => {
+        g.append("g")
+            .attr("class", "quantize")
+            .attr("transform", "translate(0, 150)");
+        let quantizeSelection = g.select(".quantize");
 
-    // const colorScale = scaleOrdinal();
+        let Yposition = 120;
+        let tempRate = ((Math.abs(lowestTemp) + highestTemp) / colorPalette.length);
 
-    // const render = () => {
-    //     paintMap(g, {
-    //         date,
-    //         topoData,
-    //         temperatureData
-    //     })
-    // }
+        let currentTempRange = lowestTemp;
+        let nextTempRange = currentTempRange + tempRate;
 
-    var timer;
+        colorPalette.forEach(color => {
+
+            quantizeSelection.append("circle").attr("cx", 50).attr("cy", Yposition).attr("r", 7).style("fill", color);
+            quantizeSelection.append("text").attr("x", 70).attr("y", Yposition).text(`${currentTempRange.toFixed(0)} \u00B0 to ${nextTempRange.toFixed(0)} \u00B0C`).style("font-size", "15px").attr("alignment-baseline", "middle");
+
+            Yposition = Yposition + 15;
+            currentTempRange = nextTempRange;
+            nextTempRange = currentTempRange + tempRate;
+
+        });
+
+        quantizeSelection.append("circle").attr("cx", 50).attr("cy", Yposition).attr("r", 7).style("fill", 'black');
+        quantizeSelection.append("text").attr("x", 70).attr("y", Yposition).text('No Data').style("font-size", "15px").attr("alignment-baseline", "middle");
+    };
+
+    generateLegend();
 
     Promise.all([
         d3.json('countries-110m.json'),
         d3.csv('GlobalLandTemperaturesByCountry.csv')
     ]).then(([topoData, temperatureData]) => {
 
-        paintMap(g, { date: '2000-01-01', topoData, temperatureData });
 
-        var formatDateIntoYear = d3.timeFormat("%Y");
-        var formatDate = d3.timeFormat("%Y-%m-01");
-        d3.timeParse("%m/%d/%y");
+        // example
 
-        var startDate = new Date("1930-11-01"),
-            endDate = new Date("2011-04-01");
+
+        console.log('lel');
+        console.log(temperatureData);
+
+        const firstTemperatureDataDate = temperatureData[0].dt;
+        const lastTemperatureDataDate = temperatureData[temperatureData.length - 1].dt;
+
+        var startDate = new Date(firstTemperatureDataDate),
+            endDate = new Date(lastTemperatureDataDate);
+
+        paintMap(g, { date: formatDate(startDate), topoData, temperatureData, colorScale: quant });
+
+
+
+
 
         var margin = {
                 top: 50,
@@ -117,7 +191,8 @@
             width = 960 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
 
-        var svg = d3.select("#vis")
+
+        var svg2 = d3.select("#vis")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
@@ -133,7 +208,7 @@
             .range([0, targetValue])
             .clamp(true);
 
-        var slider = svg.append("g")
+        var slider = svg2.append("g")
             .attr("class", "slider")
             .attr("transform", "translate(" + margin.left + "," + height / 5 + ")");
 
@@ -155,7 +230,7 @@
                 })
                 .on("start drag", function() {
                     currentValue = event.x;
-                    console.log(currentValue);
+                    // console.log(currentValue)
                     update(x.invert(currentValue));
                 })
             );
@@ -168,7 +243,7 @@
             .enter()
             .append("text")
             .attr("x", x)
-            .attr("y", 10)
+            .attr("y", 1)
             .attr("text-anchor", "middle")
             .text(function(d) {
                 return formatDateIntoYear(d);
@@ -181,13 +256,9 @@
         var label = slider.append("text")
             .attr("class", "label")
             .attr("text-anchor", "middle")
-            .text(formatDate(startDate))
+            .text(sliderDate(startDate))
             .attr("transform", "translate(0," + (-25) + ")");
-            ////////// plot //////////
 
-        svg.append("g")
-            .attr("class", "plot")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
         playButton
@@ -211,8 +282,8 @@
 
         function step() {
             update(x.invert(currentValue));
-            currentValue = currentValue + (targetValue / 151);
-            console.log(currentValue);
+            currentValue = currentValue + (targetValue / 1000); //151
+            // console.log(currentValue)
             if (currentValue > targetValue) {
                 moving = false;
                 currentValue = 0;
@@ -223,21 +294,18 @@
             }
         }
 
+
         function update(h) {
             // update position and text of label according to slider scale
             handle.attr("cx", x(h));
             label
                 .attr("x", x(h))
-                .text(formatDate(h));
+                .text(sliderDate(h));
 
 
             console.log(formatDate(h));
-            paintMap(g, { date: formatDate(h), topoData, temperatureData });
-            // // filter data set and redraw plot
-            // var newData = dataset.filter(function(d) {
-            //         return d.date < h;
-            //     })
-            //     //drawPlot(newData);
+            paintMap(g, { date: formatDate(h), topoData, temperatureData, colorScale: quant });
+
         }
 
 

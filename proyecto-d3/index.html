@@ -2,16 +2,23 @@
 <html>
 
 <head>
-    <title>Vamo a hacer mapitas!</title>
+    <title>Temperaturas Globales</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.13.0/d3-legend.min.js"></script>
+
     <script src="https://unpkg.com/d3@5.6.0/dist/d3.min.js"></script>
     <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script>
+
 </head>
 
 <body>
-    <svg width="960" height="700"></svg>
-    <script src="bundle.js"></script>
 
+    <svg width="960" height="580"></svg>
+
+    <div class="tooltip"></div>
+
+    <script src="bundle.js"></script>
     <div id="vis">
         <button id="play-button">Play</button>
     </div>
