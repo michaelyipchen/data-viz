@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+
+</style>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.13.0/d3-legend.min.js"></script>
+
+<body>
+    <p>d3-legend practice</p>
+    <svg style="width: 1000px; height:600px"></svg>
+</body>
+
+<script>
+    var svg = d3.select("svg");
+
+    // QUANTIZE
+    var indexToColor = d3.scale.quantile()
+        .domain([0, 10])
+        .range(["#313695", "#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090", "#fdae61", "#f46d43", "#d73027", "#a50026"]);
+    var range = d3.range(11).map(indexToColor);
+    var quant = d3.scale.quantile()
+        .domain([-30, 40])
+        .range(range);
+
+    console.log(quant(22.2))
+
+    svg.append("g")
+        .attr("class", "quantize")
+        .attr("transform", "translate(200,50)");
+
+    var legendQuant = d3.legend.color()
+        .title("Quantize")
+        .labelFormat(d3.format('.0f'))
+        .scale(quant);
+
+    svg.select(".quantize").call(legendQuant);
+</script>
