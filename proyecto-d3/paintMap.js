@@ -139,7 +139,7 @@ export const paintMap = (g, data) => {
 
         let HTMLString = `
         <h2>${countryName} ${currentTemp === 'NaN' || currentTemp === null ? 'No Data' : currentTemp+'\u00B0C'}</h2>
-        <h3>${date}    </h3>
+        <h3>${date.substring(0,7)}    </h3>
         
         <table style="">
             <tr>
